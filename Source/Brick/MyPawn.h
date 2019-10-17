@@ -6,6 +6,8 @@
 #include "GameFramework/Pawn.h"
 #include "MyPawn.generated.h"
 
+class USphereComponent;
+class UStaticMeshComponent;
 class UCameraComponent;
 class UMyPawnMovementComponent;
 class UParticleSystemComponent;
@@ -46,10 +48,24 @@ public:
 
 
 public:
+	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadWrite)
+	USphereComponent*					SphereComponent = nullptr;
+
+	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent*				SphereVisual = nullptr;
+
+	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadWrite)
 	UMyPawnMovementComponent*			MovementComponent = nullptr;
+
+	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadWrite)
 	UParticleSystemComponent*			ParticleSystemComponent = nullptr;
+
+	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadWrite)
 	USpringArmComponent*				SpringArmComponent = nullptr;
+
+	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadWrite)
 	UCameraComponent*					CameraComponent = nullptr;
+
 	bool								bThirdPersonView = true;
 	float								CameraZoomFactor = 1.f; // [0.0f, 1.0f]
 };

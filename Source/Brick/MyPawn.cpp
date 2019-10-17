@@ -1,4 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+#include "MyPawn.h"
+#include "MyPawnMovementComponent.h"
+
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/SphereComponent.h"
@@ -11,9 +14,6 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
-#include "MyPawn.h"
-#include "MyPawnMovementComponent.h"
-
 constexpr float CAMERA_BLEND_SECONDS = 0.75f;
 
 // Sets default values
@@ -22,12 +22,12 @@ AMyPawn::AMyPawn()
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	USphereComponent* SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));
-	RootComponent = SphereComponent;
-	SphereComponent->InitSphereRadius(40.f);
+	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
+	SphereComponent->InitSphereRadius(30.f);
 	SphereComponent->SetCollisionProfileName(TEXT("Pawn"));
+	RootComponent = SphereComponent;
 
-	UStaticMeshComponent* SphereVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
+	SphereVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
 	SphereVisual->SetupAttachment(RootComponent);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereAsset(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
 	if (SphereAsset.Succeeded()) {
