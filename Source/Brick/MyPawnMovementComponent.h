@@ -17,7 +17,7 @@ class BRICK_API UMyPawnMovementComponent : public UPawnMovementComponent
 public:
 	virtual void	TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void	StopMovementImmediately() override;
-	void			StartJumping();
+	void			Jump();
 
 private:
 	float			_GetGravityZ() const;

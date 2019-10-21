@@ -7,7 +7,23 @@
 void UMyVehicleMovementComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	if (UpdatedComponent->IsSimulatingPhysics()) {
-		FVector InputForce = ConsumeInputVector().GetClampedToMaxSize(1.0f) * 300.f;
-		UpdatedPrimitive->AddForce(InputForce);
+		UpdatedPrimitive->AddForce(TractionForce);
+		UpdatedPrimitive->SetPhysicsLinearVelocity(UpdatedPrimitive->GetPhysicsLinearVelocity().GetClampedToMaxSize(2000.f));
+		TractionForce = FVector::ZeroVector;
 	}
+}
+
+void UMyVehicleMovementComponent::Accelerate(float value)
+{
+	TractionForce += FVector(UpdatedComponent->GetForwardVector() * 2000.f);
+}
+
+void UMyVehicleMovementComponent::Brake(float value)
+{
+	TractionForce += FVector(-UpdatedComponent->GetForwardVector() * 2000.f);
+}
+
+void UMyVehicleMovementComponent::SteerRight(float value)
+{
+
 }

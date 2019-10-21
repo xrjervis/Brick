@@ -16,4 +16,10 @@ class BRICK_API UMyVehicleMovementComponent : public UPawnMovementComponent
 public:
 	virtual void	TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	void Accelerate(float value); // [0.f, 1.f]
+	void Brake(float value); //[0.f, 1.f]
+	void SteerRight(float value); //[-1.f, 1.f]
+
+private:
+	FVector TractionForce;
 };

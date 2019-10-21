@@ -39,13 +39,12 @@ public:
 
 	void								MoveForward(float AxisValue);
 	void								MoveRight(float AxisValue);
+	void								Jump();
 	void								CameraYaw(float AxisValue);
 	void								CameraPitch(float AxisValue);
 	void								ToggleParticle();
 	void								SwitchCamera();
 	void								ZoomCamera(float DeltaTime);
-	void								Jump();
-
 
 public:
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadWrite)

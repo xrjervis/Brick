@@ -87,10 +87,9 @@ void UMyPawnMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 void UMyPawnMovementComponent::StopMovementImmediately() 
 {
 	bPendingStopMovement = true;
-	UE_LOG(LogTemp, Warning, TEXT("MyPawnMovementComponent::StopMOvementImmediately"));
 }
 
-void UMyPawnMovementComponent::StartJumping()
+void UMyPawnMovementComponent::Jump()
 {
 	if (bJumping || bPendingJump) {
 		return;

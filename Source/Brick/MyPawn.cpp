@@ -55,8 +55,6 @@ AMyPawn::AMyPawn()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
 
-	AutoPossessPlayer = EAutoReceiveInput::Player0;
-
 	MovementComponent = CreateDefaultSubobject<UMyPawnMovementComponent>(TEXT("CustomMovementComponent"));
 	MovementComponent->UpdatedComponent = RootComponent;
 }
@@ -79,14 +77,6 @@ void AMyPawn::Tick(float DeltaTime)
 void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	PlayerInputComponent->BindAction("ToggleParticle", IE_Pressed, this, &AMyPawn::ToggleParticle);
-	PlayerInputComponent->BindAction("SwitchCamera", IE_Pressed, this, &AMyPawn::SwitchCamera);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AMyPawn::Jump);
-	PlayerInputComponent->BindAxis("MoveForward", this, &AMyPawn::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &AMyPawn::MoveRight);
-	PlayerInputComponent->BindAxis("CameraYaw", this, &AMyPawn::CameraYaw);
-	PlayerInputComponent->BindAxis("CameraPitch", this, &AMyPawn::CameraPitch);
 }
 
 UPawnMovementComponent* AMyPawn::GetMovementComponent() const
@@ -117,6 +107,11 @@ void AMyPawn::MoveRight(float AxisValue)
 	if (MovementComponent && (MovementComponent->UpdatedComponent == RootComponent)) {
 		MovementComponent->AddInputVector(GetActorRightVector() * AxisValue);
 	}
+}
+
+void AMyPawn::Jump()
+{
+	MovementComponent->Jump();
 }
 
 void AMyPawn::CameraYaw(float AxisValue)
@@ -159,9 +154,3 @@ void AMyPawn::ZoomCamera(float DeltaTime)
 	CameraComponent->FieldOfView = FMath::Lerp<float>(60.f, 90.f, CameraZoomFactor);
 	SpringArmComponent->TargetArmLength = FMath::Lerp<float>(0.f, 400.f, CameraZoomFactor);
 }
-
-void AMyPawn::Jump()
-{
-	MovementComponent->StartJumping();
-}
-
