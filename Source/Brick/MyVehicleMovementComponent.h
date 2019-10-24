@@ -23,5 +23,6 @@ public:
 private:
 	FVector TractionForce;
 	FVector SteerTorque;
+	FVector AlignmentNormal;
 	float MaxSpeed = 2000.f;
 };

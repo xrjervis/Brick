@@ -36,11 +36,11 @@ void UMyPawnMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 	FVector MoveDelta = NewVelocity * DeltaTime + NewAcceleration * DeltaTime * DeltaTime * 0.5f;
 
 	FString DebugMsg = FString::Printf(TEXT("Speed: %.2f"), Velocity.Size());
-	GEngine->AddOnScreenDebugMessage(1, 0.0f, FColor::Green, DebugMsg);
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, DebugMsg);
 	DebugMsg = FString::Printf(TEXT("Jumping: %s"), bJumping ? TEXT("true") : TEXT("false"));
-	GEngine->AddOnScreenDebugMessage(2, 0.0f, FColor::Green, DebugMsg);
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, DebugMsg);
 	DebugMsg = FString::Printf(TEXT("DragAccel: (%.2f, %.2f, %.2f)"), DragAccel.X, DragAccel.Y, DragAccel.Z);
-	GEngine->AddOnScreenDebugMessage(3, 0.0f, FColor::Green, DebugMsg);
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, DebugMsg);
 
 	// Get and then clear the movement vector that we set in MyPawn::Tick
 	//FVector DesiredMovementThisFrame = MoveDelta + ConsumeInputVector().GetClampedToMaxSize(1.0f) * DeltaTime * 150.f;
@@ -67,9 +67,9 @@ void UMyPawnMovementComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 
 
 			DebugMsg = FString::Printf(TEXT("Friction: %.2f"), FrictionMagnitude);
-			GEngine->AddOnScreenDebugMessage(4, 0.0f, FColor::Green, DebugMsg);
+			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, DebugMsg);
 			DebugMsg = FString::Printf(TEXT("Hit.Time: %f"), Hit.Time);
-			GEngine->AddOnScreenDebugMessage(5, 0.0f, FColor::Green, DebugMsg);
+			GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, DebugMsg);
 
 
 			// Handles the calculations and physics involved with sliding smoothly along collision surfaces like walls and ramps
