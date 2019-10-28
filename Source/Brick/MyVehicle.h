@@ -32,7 +32,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void AccelerateOrBrake(float AxisValue);
+	void Accelerate(float AxisValue);
+	void Brake(float AxisValue);
 	void SteerRight(float AxisValue);
 
 public:

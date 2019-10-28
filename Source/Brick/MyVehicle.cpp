@@ -68,14 +68,14 @@ void AMyVehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void AMyVehicle::AccelerateOrBrake(float AxisValue)
+void AMyVehicle::Accelerate(float AxisValue)
 {
-	if (AxisValue > 0.f) {
-		MovementComponent->Accelerate(AxisValue);
-	}
-	else if (AxisValue < 0.f) {
-		MovementComponent->Brake(FMath::Abs(AxisValue));
-	}
+	MovementComponent->Accelerate(AxisValue);
+}
+
+void AMyVehicle::Brake(float AxisValue)
+{
+	MovementComponent->Brake(AxisValue);
 }
 
 void AMyVehicle::SteerRight(float AxisValue)

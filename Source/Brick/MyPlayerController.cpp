@@ -30,7 +30,8 @@ void AMyPlayerController::OnPossess(APawn* aPawn)
 		InputComponent->BindAxis("CameraPitch", MyPawn, &AMyPawn::CameraPitch);
 	}
 	else if (AMyVehicle * MyVehicle = Cast<AMyVehicle>(aPawn)) {
-		InputComponent->BindAxis("AccelerateOrBrake", MyVehicle, &AMyVehicle::AccelerateOrBrake);
+		InputComponent->BindAxis("Accelerate", MyVehicle, &AMyVehicle::Accelerate);
+		InputComponent->BindAxis("Brake", MyVehicle, &AMyVehicle::Brake);
 		InputComponent->BindAxis("SteerRight", MyVehicle, &AMyVehicle::SteerRight);
 	}
 
