@@ -23,7 +23,7 @@ public:
 	float EnginePower = 0.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Vehicle")
-	float MaxEnginePower = 2000000.f;
+	float MaxEnginePower = 2500.f;
 
 private:
 	FVector TractionForce;
@@ -33,4 +33,5 @@ private:
 
 	float AccelerateValue = 0.f;
 	float BrakeValue = 0.f;
+	float SteerValue = 0.f;
 };

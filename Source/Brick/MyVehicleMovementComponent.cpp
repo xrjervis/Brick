@@ -7,6 +7,7 @@
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
+#include "Math/NumericLimits.h"
 
 void UMyVehicleMovementComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
@@ -14,28 +15,19 @@ void UMyVehicleMovementComponent::TickComponent(float DeltaTime, enum ELevelTick
 	float OldSpeed = OldVelocity.Size();
 
 	if (AccelerateValue > 0.f) {
-		EnginePower += AccelerateValue * DeltaTime * 100000.f;
+		EnginePower += AccelerateValue * DeltaTime * 500.f;
 	}
 	else {
-		EnginePower -= DeltaTime * 100000.f;
+		EnginePower -= DeltaTime * 2500.f;
 	}
 	EnginePower = FMath::Clamp(EnginePower, 0.f, MaxEnginePower);
-	FString DebugMsg = FString::Printf(TEXT("Engine power: %.2f"), EnginePower);
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Cyan, DebugMsg);
-	DebugMsg = FString::Printf(TEXT("Speed: %.2f"), OldSpeed);
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Cyan, DebugMsg);
-
-	FVector Force_braking(0.f);
-	float C_braking = 2000000.f;
-	if (BrakeValue > 0.f) {
-		EnginePower = 0.f;
-		if (OldSpeed > 10.f) {
-			Force_braking = -UpdatedComponent->GetForwardVector() * C_braking;
-		}
-	}
-
 	FVector Force_traction = UpdatedComponent->GetForwardVector() * EnginePower;
 
+	FString DebugMsg = FString::Printf(TEXT("Engine power: %f"), EnginePower);
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Cyan, DebugMsg);
+	DebugMsg = FString::Printf(TEXT("Speed: %f"), OldSpeed);
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Cyan, DebugMsg);
+	
 	// Fluid Mechanics: C_drag = 0.5f * C_d * Area * rho
 	// C_d depends on the shape of the car and determined via wind tunnel test. Approximate value for a Corvette: 0.3
 	// Air density (rho) is 1.29 kg/m3
@@ -47,15 +39,32 @@ void UMyVehicleMovementComponent::TickComponent(float DeltaTime, enum ELevelTick
 	constexpr float C_rr = 30.f * C_drag;
 	FVector Force_rr = -C_rr * OldVelocity;
 
-	FVector Force_long = Force_traction + Force_braking + Force_drag + Force_rr;
+	FVector Force_long(0.f);
 
-	float Mass = 1000.f;
+	FVector Force_braking(0.f);
+	float C_braking = 5000.f;
+
+	if (BrakeValue > 0.f) {
+		if (OldSpeed > 0.f) {
+			Force_braking = -UpdatedComponent->GetForwardVector() * C_braking;
+			Force_long += Force_braking;
+		}
+	}
+	else {
+		Force_long += Force_traction;
+	}
+	Force_long += Force_drag + Force_rr;
+
+	float Mass = 1000.f; //kg
 
 	FVector Acceleration = Force_long / Mass;
 
 	FVector NewVelocity = OldVelocity + Acceleration * DeltaTime;
+	if (BrakeValue > 0.f && (FVector::DotProduct(OldVelocity, NewVelocity) < 0.f)) {
+		NewVelocity = FVector::ZeroVector;
+	}
 
-	FVector DeltaMove = NewVelocity * DeltaTime;
+	FVector DeltaMove = NewVelocity * DeltaTime * 100.f; //times 100 m -> cm
 
 	FHitResult Hit(1.0f);
 	SafeMoveUpdatedComponent(DeltaMove, UpdatedComponent->GetComponentRotation(), true, Hit);
@@ -68,6 +77,13 @@ void UMyVehicleMovementComponent::TickComponent(float DeltaTime, enum ELevelTick
 		// when a move results in a collision, rather than simply stopping in place and sticking to the wall or ramp
 		SlideAlongSurface(DeltaMove, 1.f - Hit.Time, Hit.Normal, Hit);
 	}
+
+// 	const float FrontRearWheelDist = 400.f;
+// 	float SteerDegrees = 45.f * SteerValue;
+// 	float SteerRadius = FrontRearWheelDist / FMath::Sin(FMath::DegreesToRadians(SteerDegrees));
+// 	float AngularSpeed = FMath::RadiansToDegrees(OldSpeed / SteerRadius);
+// 
+// 	UpdatedPrimitive->AddWorldRotation(FQuat::MakeFromEuler(FVector::UpVector * AngularSpeed * DeltaTime));
 
 	Velocity = NewVelocity;
 	UpdateComponentVelocity();
@@ -113,5 +129,5 @@ void UMyVehicleMovementComponent::Brake(float value)
 
 void UMyVehicleMovementComponent::SteerRight(float value)
 {
-
+	SteerValue = value;
 }
