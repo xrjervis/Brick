@@ -11,14 +11,29 @@
 
 void UMyVehicleMovementComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
+	FVector Force_long(0.f);
+
+	// Get old velocity from last frame
 	FVector OldVelocity = UpdatedComponent->ComponentVelocity;
 	float OldSpeed = OldVelocity.Size();
 
+	// Fluid Mechanics: C_drag = 0.5f * C_d * Area * rho
+	// C_d depends on the shape of the car and determined via wind tunnel test. Approximate value for a Corvette: 0.3
+	// Air density (rho) is 1.29 kg/m3
+	// frontal area is approx 2.2 m2
+	constexpr float C_drag = 0.5f * 2.f * 5.f * 1.29f;
+	FVector Force_drag = -C_drag * OldVelocity * OldSpeed;
+
+	// Rolling resistance, approx. 30 times C_drag
+	constexpr float C_rr = 30.f * C_drag;
+	FVector Force_rr = -C_rr * OldVelocity;
+
+	// Calculate engine power and traction force
 	if (AccelerateValue > 0.f) {
-		EnginePower += AccelerateValue * DeltaTime * 500.f;
+		EnginePower += AccelerateValue * DeltaTime * 1500.f;
 	}
 	else {
-		EnginePower -= DeltaTime * 2500.f;
+		EnginePower -= DeltaTime * 4000.f;
 	}
 	EnginePower = FMath::Clamp(EnginePower, 0.f, MaxEnginePower);
 	FVector Force_traction = UpdatedComponent->GetForwardVector() * EnginePower;
@@ -28,23 +43,12 @@ void UMyVehicleMovementComponent::TickComponent(float DeltaTime, enum ELevelTick
 	DebugMsg = FString::Printf(TEXT("Speed: %f"), OldSpeed);
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Cyan, DebugMsg);
 	
-	// Fluid Mechanics: C_drag = 0.5f * C_d * Area * rho
-	// C_d depends on the shape of the car and determined via wind tunnel test. Approximate value for a Corvette: 0.3
-	// Air density (rho) is 1.29 kg/m3
-	// frontal area is approx 2.2 m2
-	constexpr float C_drag = 0.5f * 0.3f * 2.2f * 1.29f;
-	FVector Force_drag = -C_drag * OldVelocity * OldSpeed;
-
-	// Rolling resistance, approx. 30 times C_drag
-	constexpr float C_rr = 30.f * C_drag;
-	FVector Force_rr = -C_rr * OldVelocity;
-
-	FVector Force_long(0.f);
-
+	// Calculate braking force
 	FVector Force_braking(0.f);
-	float C_braking = 5000.f;
+	float C_braking = 8000.f;
 
 	if (BrakeValue > 0.f) {
+		// Do not apply braking force if speed is reduced to zero
 		if (OldSpeed > 0.f) {
 			Force_braking = -UpdatedComponent->GetForwardVector() * C_braking;
 			Force_long += Force_braking;
@@ -60,9 +64,25 @@ void UMyVehicleMovementComponent::TickComponent(float DeltaTime, enum ELevelTick
 	FVector Acceleration = Force_long / Mass;
 
 	FVector NewVelocity = OldVelocity + Acceleration * DeltaTime;
+
+	// Prevent velocity increasing backwards
 	if (BrakeValue > 0.f && (FVector::DotProduct(OldVelocity, NewVelocity) < 0.f)) {
 		NewVelocity = FVector::ZeroVector;
 	}
+
+	// Steering
+	// Calculate angular velocity
+	const float FrontRearWheelDist = 3.2f; // meters
+	float SteerDegrees = 30.f * SteerValue;
+	float SteerRadius = FrontRearWheelDist / FMath::Sin(FMath::DegreesToRadians(SteerDegrees));
+	float AngularSpeed = FMath::RadiansToDegrees(OldSpeed / SteerRadius);
+
+	// Rotates vehicle's body
+	UpdatedPrimitive->AddWorldRotation(FQuat::MakeFromEuler(FVector::UpVector * AngularSpeed * DeltaTime));
+
+	// Eliminate lateral velocity
+	FVector LateralVelocity = NewVelocity.ProjectOnToNormal(UpdatedPrimitive->GetRightVector());
+	NewVelocity -= LateralVelocity;
 
 	FVector DeltaMove = NewVelocity * DeltaTime * 100.f; //times 100 m -> cm
 
@@ -77,13 +97,6 @@ void UMyVehicleMovementComponent::TickComponent(float DeltaTime, enum ELevelTick
 		// when a move results in a collision, rather than simply stopping in place and sticking to the wall or ramp
 		SlideAlongSurface(DeltaMove, 1.f - Hit.Time, Hit.Normal, Hit);
 	}
-
-// 	const float FrontRearWheelDist = 400.f;
-// 	float SteerDegrees = 45.f * SteerValue;
-// 	float SteerRadius = FrontRearWheelDist / FMath::Sin(FMath::DegreesToRadians(SteerDegrees));
-// 	float AngularSpeed = FMath::RadiansToDegrees(OldSpeed / SteerRadius);
-// 
-// 	UpdatedPrimitive->AddWorldRotation(FQuat::MakeFromEuler(FVector::UpVector * AngularSpeed * DeltaTime));
 
 	Velocity = NewVelocity;
 	UpdateComponentVelocity();

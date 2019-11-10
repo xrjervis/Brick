@@ -11,6 +11,7 @@ class UStaticMeshComponent;
 class UCameraComponent;
 class UMyVehicleMovementComponent;
 class USpringArmComponent;
+class USuspensionComponent;
 
 UCLASS()
 class BRICK_API AMyVehicle : public APawn
@@ -29,9 +30,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 	void Accelerate(float AxisValue);
 	void Brake(float AxisValue);
 	void SteerRight(float AxisValue);
@@ -41,7 +39,7 @@ public:
 	UBoxComponent* BoxComponent = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent* BoxVisual = nullptr;
+	UStaticMeshComponent* VehicleBody = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	USpringArmComponent* SpringArmComponent = nullptr;
@@ -49,6 +47,14 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UCameraComponent* CameraComponent = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UMyVehicleMovementComponent* MovementComponent = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Suspension")
+	USuspensionComponent* Suspension_FL;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Suspension")
+	USuspensionComponent* Suspension_FR;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Suspension")
+	USuspensionComponent* Suspension_RL;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Suspension")
+	USuspensionComponent* Suspension_RR;
+// 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+// 	UMyVehicleMovementComponent* MovementComponent = nullptr;
 };

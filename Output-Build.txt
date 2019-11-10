@@ -1,0 +1,21 @@
+﻿1>------ Skipped Build: Project: UE4, Configuration: BuiltWithUnrealBuildTool Win32 ------
+1>Project not selected to build for this solution configuration 
+2>------ Build started: Project: Brick, Configuration: Development_Editor x64 ------
+2>Using 'git status' to determine working set for adaptive non-unity build (D:\Projects\UE4\Brick).
+2>Parsing headers for BrickEditor
+2>  Running UnrealHeaderTool "D:\Projects\UE4\Brick\Brick.uproject" "D:\Projects\UE4\Brick\Intermediate\Build\Win64\BrickEditor\Development\BrickEditor.uhtmanifest" -LogCmds="loginit warning, logexit warning, logdatabase error" -Unattended -WarningsAsErrors -installed
+2>Reflection code generated for BrickEditor in 4.3258778 seconds
+2>Using Visual Studio 2019 14.22.27905 toolchain (C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905) and Windows 10.0.16299.0 SDK (C:\Program Files (x86)\Windows Kits\10).
+2>Building 7 actions with 16 processes...
+2>  [1/7] Brick.init.gen.cpp
+2>  [2/7] MyVehicle.gen.cpp
+2>  [3/7] MyPlayerController.cpp
+2>  [4/7] MyVehicle.cpp
+2>  [5/7] UE4Editor-Brick-0014.lib
+2>     Creating library D:\Projects\UE4\Brick\Intermediate\Build\Win64\UE4Editor\Development\Brick\UE4Editor-Brick-0014.lib and object D:\Projects\UE4\Brick\Intermediate\Build\Win64\UE4Editor\Development\Brick\UE4Editor-Brick-0014.exp
+2>  [6/7] UE4Editor-Brick-0014.dll
+2>     Creating library D:\Projects\UE4\Brick\Intermediate\Build\Win64\UE4Editor\Development\Brick\UE4Editor-Brick-0014.suppressed.lib and object D:\Projects\UE4\Brick\Intermediate\Build\Win64\UE4Editor\Development\Brick\UE4Editor-Brick-0014.suppressed.exp
+2>  [7/7] BrickEditor.target
+2>Total time in Parallel executor: 1.46 seconds
+2>Total execution time: 6.35 seconds
+========== Build: 1 succeeded, 0 failed, 0 up-to-date, 1 skipped ==========
