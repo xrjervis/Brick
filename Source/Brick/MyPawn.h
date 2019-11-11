@@ -47,24 +47,24 @@ public:
 	void								ZoomCamera(float DeltaTime);
 
 public:
-	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadWrite)
-	USphereComponent*					SphereComponent = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	USphereComponent* SphereComponent = nullptr;
 
-	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent*				SphereVisual = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* SphereVisual = nullptr;
 
-	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadWrite)
-	UMyPawnMovementComponent*			MovementComponent = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UMyPawnMovementComponent* MovementComponent = nullptr;
 
-	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadWrite)
-	UParticleSystemComponent*			ParticleSystemComponent = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UParticleSystemComponent* ParticleSystemComponent = nullptr;
 
-	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadWrite)
-	USpringArmComponent*				SpringArmComponent = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	USpringArmComponent* SpringArmComponent = nullptr;
 
-	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadWrite)
-	UCameraComponent*					CameraComponent = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UCameraComponent* CameraComponent = nullptr;
 
-	bool								bThirdPersonView = true;
-	float								CameraZoomFactor = 1.f; // [0.0f, 1.0f]
+	bool bThirdPersonView = true;
+	float CameraZoomFactor = 1.f; // [0.0f, 1.0f]
 };
