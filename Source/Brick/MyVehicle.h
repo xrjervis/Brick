@@ -55,6 +55,7 @@ public:
 	USuspensionComponent* Suspension_RL;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Suspension")
 	USuspensionComponent* Suspension_RR;
+
 // 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 // 	UMyVehicleMovementComponent* MovementComponent = nullptr;
 };

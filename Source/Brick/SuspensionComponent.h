@@ -6,6 +6,8 @@
 #include "Components/SceneComponent.h"
 #include "SuspensionComponent.generated.h"
 
+class UStaticMeshComponent;
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BRICK_API USuspensionComponent : public USceneComponent
 {
@@ -44,5 +46,7 @@ public:
 	float MaxForce = 6000.f;
 
 	UPrimitiveComponent* Body = nullptr;
+	UPrimitiveComponent* WheelMesh = nullptr;
+
 	float SpringLength = RestLength;
 };

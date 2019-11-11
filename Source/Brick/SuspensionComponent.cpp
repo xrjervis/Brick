@@ -2,6 +2,7 @@
 
 #include "CollisionQueryParams.h"
 #include "Components/PrimitiveComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
@@ -23,8 +24,12 @@ USuspensionComponent::USuspensionComponent()
 void USuspensionComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
 	Body = Cast<UPrimitiveComponent>(GetAttachmentRoot());
-	check(Body != nullptr);
+	checkf(Body, TEXT("Must be attached to a root static mesh component"));
+
+	WheelMesh = Cast<UPrimitiveComponent>(GetChildComponent(0));
+	checkf(WheelMesh, TEXT("Must attach a wheel static mesh"));
 }
 
 
@@ -57,6 +62,13 @@ void USuspensionComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 
 		FString DebugMsg = FString::Printf(TEXT("Force: %.2f"), SpringForce);
 		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Blue, DebugMsg);
+	}
+	else {
+		SpringLength = RestLength + TravelLength;
+	}
+
+	if (WheelMesh) {
+		WheelMesh->SetRelativeLocation(FVector(0.f, 0.f, -SpringLength));
 	}
 }
 
