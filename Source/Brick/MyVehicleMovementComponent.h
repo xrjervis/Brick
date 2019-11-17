@@ -32,17 +32,20 @@ public:
 
 public:
 	UPROPERTY(EditAnywhere, Category = "VehicleMovement")
-	float MinSteeringAngle = -45.f;
-	UPROPERTY(EditAnywhere, Category = "VehicleMovement")
-	float MaxSteeringAngle = 45.f;
+	float TurnRadius = 1080.f;
 
 private:
-	float InputAxisValueX = 0.f;
-	float InputAxisValueY = 0.f;
-	float SteeringAngle = 0.f;
-
 	USuspensionComponent* Suspension_FL = nullptr;
 	USuspensionComponent* Suspension_FR = nullptr;
 	USuspensionComponent* Suspension_RL = nullptr;
 	USuspensionComponent* Suspension_RR = nullptr;
+
+	float WheelBase;
+	float RearTrack;
+	
+	float InputAxisValueX = 0.f;
+
+	float SteerInput = 0.f;
+	float SteerAngleLeft = 0.f;
+	float SteerAngleRight = 0.f;
 };
