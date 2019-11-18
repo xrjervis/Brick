@@ -71,6 +71,9 @@ void UMyVehicleMovementComponent::TickComponent(float DeltaTime, enum ELevelTick
 	Suspension_FL->SetRelativeRotation(FQuat::MakeFromEuler(FVector(0.f, 0.f, SteerAngleLeft)));
 	Suspension_FR->SetRelativeRotation(FQuat::MakeFromEuler(FVector(0.f, 0.f, SteerAngleRight)));
 
+	Suspension_FL->SetGasInput(GasInput);
+	Suspension_FR->SetGasInput(GasInput);
+
 	if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Blue, FString::Printf(TEXT("SteerAngleLeft: %.2f"), SteerAngleLeft));
 		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Blue, FString::Printf(TEXT("SteerAngleRight: %.2f"), SteerAngleRight));
@@ -82,17 +85,9 @@ void UMyVehicleMovementComponent::PostEditChangeProperty(FPropertyChangedEvent& 
 	
 }
 
-void UMyVehicleMovementComponent::Accelerate(float value)
-{
-}
-
-void UMyVehicleMovementComponent::Brake(float value)
-{
-}
-
 void UMyVehicleMovementComponent::MoveForward(float AxisValue)
 {
-	InputAxisValueX = AxisValue;
+	GasInput = AxisValue;
 }
 
 void UMyVehicleMovementComponent::SteerRight(float AxisValue)

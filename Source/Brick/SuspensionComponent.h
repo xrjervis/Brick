@@ -25,6 +25,7 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	void SetGasInput(float InputValue);
 
 public:
 	UPROPERTY(EditAnywhere, Category = "Wheel")
@@ -48,5 +49,9 @@ public:
 	UPrimitiveComponent* Body = nullptr;
 	UPrimitiveComponent* WheelMesh = nullptr;
 
+	float GasInput = 0.f;
+
 	float SpringLength = RestLength;
+	FVector WorldWheelVelocity;
+	FVector LocalWheelVelocity;
 };

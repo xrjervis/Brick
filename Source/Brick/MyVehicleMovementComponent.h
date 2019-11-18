@@ -22,9 +22,6 @@ public:
 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	
-	void Accelerate(float value); // [0.f, 1.f]
-	void Brake(float value); //[0.f, 1.f]
-
 	UFUNCTION(BlueprintCallable, Category = "VehicleMovement")
 	void MoveForward(float AxisValue); //[-1.f, 1.f]
 	UFUNCTION(BlueprintCallable, Category = "VehicleMovement")
@@ -43,7 +40,7 @@ private:
 	float WheelBase;
 	float RearTrack;
 	
-	float InputAxisValueX = 0.f;
+	float GasInput = 0.f;
 
 	float SteerInput = 0.f;
 	float SteerAngleLeft = 0.f;
