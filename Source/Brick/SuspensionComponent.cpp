@@ -58,9 +58,15 @@ void USuspensionComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 		float SpringVelocity = (LastLength - SpringLength) / DeltaTime;
 		float DamperForce = DamperStiffness * SpringVelocity;
 
-		WorldWheelVelocity = Body->GetPhysicsLinearVelocityAtPoint(WheelMesh->GetComponentLocation() - Radius * GetUpVector());
+		WorldWheelVelocity = Body->GetPhysicsLinearVelocityAtPoint(HitResult.Location);
 		LocalWheelVelocity = GetComponentTransform().InverseTransformVectorNoScale(WorldWheelVelocity);
+		AngularVelocity = LocalWheelVelocity.X / Radius; // rad/s
 
+		// Hack - If the speed is too low, snap it to zero
+		// Otherwise the car will wobbling
+		if (FMath::Abs(LocalWheelVelocity.Y) < 20.f) {
+			LocalWheelVelocity.Y = 0.f;
+		}
 		LocalWheelLateralFrictionValue = FMath::Clamp(-SpringForce * LocalWheelVelocity.Y, -SpringForce, SpringForce);
 		LocalWheelLongTractionValue = GasInput * 0.5f * SpringForce;
 
@@ -86,6 +92,12 @@ void USuspensionComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, -1.f, 0, 2);
 
 	if (WheelMesh) {
+		float WheelRotation = FMath::RadiansToDegrees(AngularVelocity * DeltaTime);
+		// Flip rotation for left side wheels
+		if (FVector::DotProduct(WheelMesh->GetRightVector(), GetRightVector()) > 0.f) {
+			WheelRotation = -WheelRotation;
+		}
+		WheelMesh->AddLocalRotation(FQuat::MakeFromEuler(FVector(0.f, WheelRotation, 0.f)));
 		WheelMesh->SetRelativeLocation(FVector(0.f, 0.f, -SpringLength));
 	}
 }
@@ -93,5 +105,10 @@ void USuspensionComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 void USuspensionComponent::SetGasInput(float InputValue)
 {
 	GasInput = InputValue;
+}
+
+void USuspensionComponent::SetHandBraking(bool value)
+{
+	IsHandBraking = value;
 }
 

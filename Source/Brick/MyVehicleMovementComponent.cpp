@@ -94,3 +94,9 @@ void UMyVehicleMovementComponent::SteerRight(float AxisValue)
 {
 	SteerInput = AxisValue;
 }
+
+void UMyVehicleMovementComponent::HandBrake(bool Value)
+{
+	Suspension_FL->SetHandBraking(Value);
+	Suspension_FR->SetHandBraking(Value);
+}

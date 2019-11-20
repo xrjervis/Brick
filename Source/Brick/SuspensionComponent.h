@@ -27,6 +27,8 @@ public:
 
 	void SetGasInput(float InputValue);
 
+	void SetHandBraking(bool value);
+
 public:
 	UPROPERTY(EditAnywhere, Category = "Wheel")
 	float Radius = 35.f;
@@ -48,10 +50,13 @@ public:
 
 	UPrimitiveComponent* Body = nullptr;
 	UPrimitiveComponent* WheelMesh = nullptr;
+	
+	bool IsHandBraking = false;
 
 	float GasInput = 0.f;
 
 	float SpringLength = RestLength;
 	FVector WorldWheelVelocity;
 	FVector LocalWheelVelocity;
+	float AngularVelocity; // rad/s
 };

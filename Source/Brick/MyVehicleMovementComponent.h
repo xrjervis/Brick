@@ -26,6 +26,8 @@ public:
 	void MoveForward(float AxisValue); //[-1.f, 1.f]
 	UFUNCTION(BlueprintCallable, Category = "VehicleMovement")
 	void SteerRight(float AxisValue); //[-1.f, 1.f]
+	UFUNCTION(BlueprintCallable, Category = "VehicleMovement")
+	void HandBrake(bool Value);
 
 public:
 	UPROPERTY(EditAnywhere, Category = "VehicleMovement")
