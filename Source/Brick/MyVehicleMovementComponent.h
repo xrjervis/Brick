@@ -7,6 +7,8 @@
 #include "MyVehicleMovementComponent.generated.h"
 
 class USuspensionComponent;
+class UStaticMeshComponent;
+class USceneComponent;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BRICK_API UMyVehicleMovementComponent : public UPawnMovementComponent
@@ -28,12 +30,20 @@ public:
 	void SteerRight(float AxisValue); //[-1.f, 1.f]
 	UFUNCTION(BlueprintCallable, Category = "VehicleMovement")
 	void HandBrake(bool Value);
+	UFUNCTION(BlueprintCallable, Category = "VehicleMovement")
+	void ToggleDebug();
+
 
 public:
 	UPROPERTY(EditAnywhere, Category = "VehicleMovement")
-	float TurnRadius = 1080.f;
+	float TurnRadius = 600.f;
+
+	UPROPERTY(EditAnywhere, Category = "VehicleMovement")
+	UCurveFloat* EngineTorqueRPMCurve = nullptr;
 
 private:
+	bool IsDebugging = false;
+
 	USuspensionComponent* Suspension_FL = nullptr;
 	USuspensionComponent* Suspension_FR = nullptr;
 	USuspensionComponent* Suspension_RL = nullptr;
@@ -41,10 +51,20 @@ private:
 
 	float WheelBase;
 	float RearTrack;
-	
-	float GasInput = 0.f;
 
 	float SteerInput = 0.f;
 	float SteerAngleLeft = 0.f;
 	float SteerAngleRight = 0.f;
+
+	float GasInput = 0.f;
+	float ThrottleValue = 0.f;
+	int CurrentGear = 1;
+	float MainGearRatio = 3.82f;
+	float EngineRPM = 0.f;
+	float EngineTorque = 0.f;
+	float EngineInertia = 0.3f;
+	float EngineAngularAcceleration = 0.f;
+	float EngineAngularVelocity = 0.f;
+	float WheelTorque = 0.f;
+	float MaxWheelSpeed = 0.f;
 };

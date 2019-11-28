@@ -71,12 +71,52 @@ void UMyVehicleMovementComponent::TickComponent(float DeltaTime, enum ELevelTick
 	Suspension_FL->SetRelativeRotation(FQuat::MakeFromEuler(FVector(0.f, 0.f, SteerAngleLeft)));
 	Suspension_FR->SetRelativeRotation(FQuat::MakeFromEuler(FVector(0.f, 0.f, SteerAngleRight)));
 
-	Suspension_FL->SetGasInput(GasInput);
-	Suspension_FR->SetGasInput(GasInput);
+	if (FMath::Abs(GasInput) > SMALL_NUMBER) {
+		ThrottleValue += DeltaTime * GasInput;
+	}
+	else {
+		ThrottleValue -= DeltaTime * 2.f;
+	}
+
+	ThrottleValue = FMath::Clamp(ThrottleValue, 0.f, 1.f);
+
+	EngineRPM += DeltaTime * FMath::Lerp(-3000, 5000, ThrottleValue);
+	EngineRPM = FMath::Clamp(EngineRPM, 0.f, 7000.f);
+
+	float TargetEngineTorque = 0.f;
+	if (EngineTorqueRPMCurve) {
+		TargetEngineTorque = EngineTorqueRPMCurve->GetFloatValue(EngineRPM) * ThrottleValue;
+	}
+	EngineTorque = FMath::Lerp(-100.f, TargetEngineTorque, ThrottleValue);
+	EngineAngularAcceleration = EngineTorque / EngineInertia;
+	EngineAngularVelocity += EngineAngularAcceleration * DeltaTime;
+	EngineAngularVelocity = FMath::Clamp(EngineAngularVelocity, 0.f, 7000.f * ((2.f * PI) / 60.f));
+
+	WheelTorque = EngineTorque * MainGearRatio * CurrentGear * 0.5f;
+	MaxWheelSpeed = EngineAngularVelocity / (MainGearRatio * CurrentGear);
+
+	Suspension_FL->SetWheelTorque(WheelTorque);
+	Suspension_FR->SetWheelTorque(WheelTorque);
+	Suspension_FL->SetMaxWheelSpeed(MaxWheelSpeed);
+	Suspension_FR->SetMaxWheelSpeed(MaxWheelSpeed);
+
+	// Front/Real/All wheel drive
+// 	Suspension_FL->SetGasInput(GasInput);
+// 	Suspension_FR->SetGasInput(GasInput);
+// 	Suspension_RL->SetGasInput(GasInput);
+// 	Suspension_RR->SetGasInput(GasInput);
 
 	if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Blue, FString::Printf(TEXT("SteerAngleLeft: %.2f"), SteerAngleLeft));
 		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Blue, FString::Printf(TEXT("SteerAngleRight: %.2f"), SteerAngleRight));
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Purple, FString::Printf(TEXT("GasInput: %.2f"), GasInput));
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Purple, FString::Printf(TEXT("ThrottleValue: %.2f"), ThrottleValue));
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Purple, FString::Printf(TEXT("EngineRPM: %.2f"), EngineRPM));
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Purple, FString::Printf(TEXT("TargetEngineTorque: %.2f"), TargetEngineTorque));
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Purple, FString::Printf(TEXT("EngineTorque: %.2f"), EngineTorque));
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Purple, FString::Printf(TEXT("EngineAngularAccel: %.2f"), EngineAngularAcceleration));
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Purple, FString::Printf(TEXT("EngineAngularVelocity: %.2f"), EngineAngularVelocity));
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Orange, FString::Printf(TEXT("WheelTorque: %.2f"), WheelTorque));
 	}
 }
 
@@ -97,6 +137,16 @@ void UMyVehicleMovementComponent::SteerRight(float AxisValue)
 
 void UMyVehicleMovementComponent::HandBrake(bool Value)
 {
-	Suspension_FL->SetHandBraking(Value);
-	Suspension_FR->SetHandBraking(Value);
+}
+
+void UMyVehicleMovementComponent::ToggleDebug()
+{
+	IsDebugging = !IsDebugging;
+
+	GetOwner()->GetRootComponent()->SetVisibility(!IsDebugging);
+
+	Suspension_FL->ToggleIsDebugging();
+	Suspension_FR->ToggleIsDebugging();
+	Suspension_RL->ToggleIsDebugging();
+	Suspension_RR->ToggleIsDebugging();
 }

@@ -27,13 +27,20 @@ public:
 
 	void SetGasInput(float InputValue);
 
-	void SetHandBraking(bool value);
+	void SetIsDebugging(bool enabled);
+	bool GetIsDebugging() const;
+	void ToggleIsDebugging();
+
+	float GetWheelInertia() const;
+
+	void SetWheelTorque(float torque);
+	void SetMaxWheelSpeed(float speed);
 
 public:
 	UPROPERTY(EditAnywhere, Category = "Wheel")
-	float Radius = 35.f;
+	float Radius = 35.f; //cm
 	UPROPERTY(EditAnywhere, Category = "Wheel")
-	float Mass = 15.f;
+	float Mass = 15.f; //kg
 
 	UPROPERTY(EditAnywhere, Category = "Suspension")
 	float RestLength = 50.f;
@@ -44,19 +51,30 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Suspension")
 	float DamperStiffness = 1500.f;
 	UPROPERTY(EditAnywhere, Category = "Suspension")
+	float CorneringStiffness = 0.5f;
+	UPROPERTY(EditAnywhere, Category = "Suspension")
+	float LongStiffness = 1.f;
+	UPROPERTY(EditAnywhere, Category = "Suspension")
 	float MinForce = -2000.f;
 	UPROPERTY(EditAnywhere, Category = "Suspension")
 	float MaxForce = 6000.f;
+	UPROPERTY(EditAnywhere, Category = "Suspension")
+	UCurveFloat* TireForceSlipCurve = nullptr;
+
+	bool IsDebugging = false;
 
 	UPrimitiveComponent* Body = nullptr;
 	UPrimitiveComponent* WheelMesh = nullptr;
 	
-	bool IsHandBraking = false;
-
 	float GasInput = 0.f;
+
+	float WheelTorque = 0.f;
+	float MaxWheelSpeed = 0.f;
 
 	float SpringLength = RestLength;
 	FVector WorldWheelVelocity;
 	FVector LocalWheelVelocity;
-	float AngularVelocity; // rad/s
+
+	float WheelAngularAcceleration;
+	float WheelAngularVelocity; // rad/s
 };
