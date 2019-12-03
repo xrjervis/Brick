@@ -26,15 +26,13 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void SetGasInput(float InputValue);
+	void SetBrakeInput(float InputValue);
 
 	void SetIsDebugging(bool enabled);
 	bool GetIsDebugging() const;
 	void ToggleIsDebugging();
 
 	float GetWheelInertia() const;
-
-	void SetWheelTorque(float torque);
-	void SetMaxWheelSpeed(float speed);
 
 public:
 	UPROPERTY(EditAnywhere, Category = "Wheel")
@@ -67,14 +65,11 @@ public:
 	UPrimitiveComponent* WheelMesh = nullptr;
 	
 	float GasInput = 0.f;
-
-	float WheelTorque = 0.f;
-	float MaxWheelSpeed = 0.f;
+	float BrakeInput = 0.f;
 
 	float SpringLength = RestLength;
 	FVector WorldWheelVelocity;
 	FVector LocalWheelVelocity;
 
-	float WheelAngularAcceleration;
 	float WheelAngularVelocity; // rad/s
 };

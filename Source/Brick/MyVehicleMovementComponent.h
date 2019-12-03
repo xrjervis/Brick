@@ -57,7 +57,6 @@ private:
 	float SteerAngleRight = 0.f;
 
 	float GasInput = 0.f;
-	float ThrottleValue = 0.f;
 	int CurrentGear = 1;
 	float MainGearRatio = 3.82f;
 	float EngineRPM = 0.f;

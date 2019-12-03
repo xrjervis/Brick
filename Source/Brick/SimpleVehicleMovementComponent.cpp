@@ -1,5 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-#include "MyVehicleMovementComponent.h"
+
+#include "SimpleVehicleMovementComponent.h"
 
 #include "CollisionQueryParams.h"
 #include "Components/PrimitiveComponent.h"
@@ -11,13 +12,18 @@
 #include "Misc/AssertionMacros.h"
 #include "SuspensionComponent.h"
 
-UMyVehicleMovementComponent::UMyVehicleMovementComponent()
+// Sets default values for this component's properties
+USimpleVehicleMovementComponent::USimpleVehicleMovementComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void UMyVehicleMovementComponent::BeginPlay()
+
+// Called when the game starts
+void USimpleVehicleMovementComponent::BeginPlay()
 {
+	Super::BeginPlay();
+
 	TArray<USceneComponent*> ChildrenComponents;
 	GetOwner()->GetRootComponent()->GetChildrenComponents(false, ChildrenComponents);
 
@@ -48,15 +54,20 @@ void UMyVehicleMovementComponent::BeginPlay()
 	RearTrack = FVector::Distance(Suspension_RL->GetComponentLocation(), Suspension_RR->GetComponentLocation());
 }
 
-void UMyVehicleMovementComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+
+// Called every frame
+void USimpleVehicleMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// Ackermann steering
 	float SteerAngleLeftTarget;
 	float SteerAngleRightTarget;
 	if (SteerInput > SMALL_NUMBER) {
 		SteerAngleLeftTarget = SteerInput * FMath::RadiansToDegrees(FMath::Atan2(WheelBase, TurnRadius + 0.5f * RearTrack));
 		SteerAngleRightTarget = SteerInput * FMath::RadiansToDegrees(FMath::Atan2(WheelBase, TurnRadius - 0.5f * RearTrack));
 	}
-	else if (SteerInput < -SMALL_NUMBER){
+	else if (SteerInput < -SMALL_NUMBER) {
 		SteerAngleLeftTarget = SteerInput * FMath::RadiansToDegrees(FMath::Atan2(WheelBase, TurnRadius - 0.5f * RearTrack));
 		SteerAngleRightTarget = SteerInput * FMath::RadiansToDegrees(FMath::Atan2(WheelBase, TurnRadius + 0.5f * RearTrack));
 	}
@@ -71,69 +82,36 @@ void UMyVehicleMovementComponent::TickComponent(float DeltaTime, enum ELevelTick
 	Suspension_FL->SetRelativeRotation(FQuat::MakeFromEuler(FVector(0.f, 0.f, SteerAngleLeft)));
 	Suspension_FR->SetRelativeRotation(FQuat::MakeFromEuler(FVector(0.f, 0.f, SteerAngleRight)));
 
-	if (FMath::Abs(GasInput) > SMALL_NUMBER) {
-		float TargetEngineRPM = FMath::Lerp(0.f, 9000.f, GasInput);
-		EngineRPM = FMath::FInterpConstantTo(EngineRPM, TargetEngineRPM, DeltaTime, 3000.f);
-	}
-	else {
-		EngineRPM -= DeltaTime * 6000.f;
-	}
-	EngineRPM = FMath::Clamp(EngineRPM, 0.f, 9000.f);
-
-	if (EngineTorqueRPMCurve) {
-		EngineTorque = EngineTorqueRPMCurve->GetFloatValue(EngineRPM);
-	}
-
-	EngineAngularAcceleration = EngineTorque / EngineInertia;
-	EngineAngularVelocity += EngineAngularAcceleration * DeltaTime;
-	EngineAngularVelocity = FMath::Clamp(EngineAngularVelocity, 0.f, EngineRPM * ((2.f * PI) / 60.f));
-
- 	WheelTorque = EngineTorque * MainGearRatio * CurrentGear;
- 	MaxWheelSpeed = EngineAngularVelocity / (MainGearRatio * CurrentGear);
-
-// 	Suspension_FL->SetWheelTorque(WheelTorque);
-// 	Suspension_FR->SetWheelTorque(WheelTorque);
-// 	Suspension_FL->SetMaxWheelSpeed(MaxWheelSpeed);
-// 	Suspension_FR->SetMaxWheelSpeed(MaxWheelSpeed);
-
-	// Front/Real/All wheel drive
-// 	Suspension_FL->SetGasInput(GasInput);
-// 	Suspension_FR->SetGasInput(GasInput);
-// 	Suspension_RL->SetGasInput(GasInput);
-// 	Suspension_RR->SetGasInput(GasInput);
-
 	if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Blue, FString::Printf(TEXT("SteerAngleLeft: %.2f"), SteerAngleLeft));
 		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Blue, FString::Printf(TEXT("SteerAngleRight: %.2f"), SteerAngleRight));
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Purple, FString::Printf(TEXT("GasInput: %.2f"), GasInput));
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Purple, FString::Printf(TEXT("EngineRPM: %.2f"), EngineRPM));
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Purple, FString::Printf(TEXT("EngineTorque: %.2f"), EngineTorque));
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Purple, FString::Printf(TEXT("EngineAngularAccel: %.2f"), EngineAngularAcceleration));
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Purple, FString::Printf(TEXT("EngineAngularVelocity: %.2f"), EngineAngularVelocity));
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Orange, FString::Printf(TEXT("WheelTorque: %.2f"), WheelTorque));
 	}
 }
 
-void UMyVehicleMovementComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
-{
-	
-}
-
-void UMyVehicleMovementComponent::MoveForward(float AxisValue)
+void USimpleVehicleMovementComponent::Accelerate(float AxisValue)
 {
 	GasInput = AxisValue;
+
+	Suspension_FL->SetGasInput(GasInput);
+	Suspension_FR->SetGasInput(GasInput);
 }
 
-void UMyVehicleMovementComponent::SteerRight(float AxisValue)
+void USimpleVehicleMovementComponent::Brake(float AxisValue)
+{
+	BrakeInput = AxisValue;
+
+	Suspension_FL->SetBrakeInput(BrakeInput);
+	Suspension_FR->SetBrakeInput(BrakeInput);
+	Suspension_RL->SetBrakeInput(BrakeInput);
+	Suspension_RR->SetBrakeInput(BrakeInput);
+}
+
+void USimpleVehicleMovementComponent::SteerRight(float AxisValue)
 {
 	SteerInput = AxisValue;
 }
 
-void UMyVehicleMovementComponent::HandBrake(bool Value)
-{
-}
-
-void UMyVehicleMovementComponent::ToggleDebug()
+void USimpleVehicleMovementComponent::ToggleDebug()
 {
 	IsDebugging = !IsDebugging;
 

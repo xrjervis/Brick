@@ -7,6 +7,7 @@
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Math/NumericLimits.h"
 #include "Misc/AssertionMacros.h"
 #include "SuspensionComponent.h"
@@ -47,15 +48,12 @@ void USuspensionComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 
 	float SpringForce;
 	FVector TireForce;
+	FVector2D LocalTireForce = FVector2D::ZeroVector;
 
 	WorldWheelVelocity = Body->GetPhysicsLinearVelocityAtPoint(WheelMesh->GetComponentLocation() - Radius * GetUpVector());
-	LocalWheelVelocity = GetComponentTransform().InverseTransformVectorNoScale(WorldWheelVelocity * 0.01f);
+	LocalWheelVelocity = GetComponentTransform().InverseTransformVectorNoScale(WorldWheelVelocity * 0.01f); // m/s
 
-	WheelAngularAcceleration = WheelTorque / GetWheelInertia();
-	WheelAngularVelocity += WheelAngularAcceleration * DeltaTime;
-	WheelAngularVelocity = FMath::Min(FMath::Abs(WheelAngularVelocity), FMath::Abs(MaxWheelSpeed)) * FMath::Sign(MaxWheelSpeed);
-
-	float LongSlipVelocity = WheelAngularVelocity * Radius * 0.01f - LocalWheelVelocity.X;
+	WheelAngularVelocity = LocalWheelVelocity.X / (Radius * 0.01f); // omega
 
 	bool IsHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, TraceParams);
 	if (IsHit) {
@@ -67,24 +65,22 @@ void USuspensionComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 		float DamperForce = DamperStiffness * SpringVelocity;
 
 		float LocalLateralSlipNorm = FMath::Clamp(LocalWheelVelocity.Y * -CorneringStiffness, -1.f, 1.f);
-		float LocalLongSlipNorm;
+		float LocalLongSlipNorm = FMath::Clamp(LocalWheelVelocity.X * -LongStiffness, -1.f, 1.f);
+		if (GasInput) {
+			LocalLongSlipNorm = GasInput;
+		}
+		if (BrakeInput) {
+			LocalLongSlipNorm = FMath::Clamp(LocalWheelVelocity.X * -(UKismetMathLibrary::MapRangeClamped(BrakeInput, 0.f, 1.f, LongStiffness, 3.f * LongStiffness)), -1.f, 1.f);
+			LocalLateralSlipNorm = FMath::Clamp(LocalWheelVelocity.Y * -(UKismetMathLibrary::MapRangeClamped(BrakeInput, 0.f, 1.f, CorneringStiffness, 0.1f * CorneringStiffness)), -1.f, 1.f);
+		}
 		
-		// Traction
-		if (FMath::Sign(LongSlipVelocity) == FMath::Sign(LocalWheelVelocity.X)) {
-			float Traction = WheelTorque / (Radius * 0.01f);
-			LocalLongSlipNorm = FMath::Clamp(Traction / FMath::Max(SpringForce, 0.0000001f), -2.f, 2.f);
-		}
-		// Friction
-		else {
-			LocalLongSlipNorm = FMath::Clamp(LongSlipVelocity * LongStiffness, -2.f, 2.f);
-		}
 
 		auto CombinedVector2D = FVector2D(LocalLongSlipNorm, LocalLateralSlipNorm);
 		float SlipSize = CombinedVector2D.Size();
-
 		CombinedVector2D.Normalize();
+
 		auto LocalTireForceNormalized = TireForceSlipCurve->GetFloatValue(SlipSize) * CombinedVector2D;
-		auto LocalTireForce = FMath::Max(SpringForce * 0.01f, 0.f) * LocalTireForceNormalized;
+		LocalTireForce = FMath::Max(SpringForce * 0.01f, 0.f) * LocalTireForceNormalized;
 
 		TireForce = LocalTireForce.X * GetForwardVector() + LocalTireForce.Y * GetRightVector();
 
@@ -112,8 +108,8 @@ void USuspensionComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 	}
 
 	if (IsDebugging) {
-		DrawDebugLine(GetWorld(), Start, Start + GetForwardVector() * TireForce.X, FColor::Red, false, -1.f, ECC_WorldStatic, 5.f);
-		DrawDebugLine(GetWorld(), Start, Start + GetRightVector() * TireForce.Y, FColor::Green, false, -1.f, ECC_WorldStatic, 5.f);
+		DrawDebugLine(GetWorld(), Start, Start + GetForwardVector() * LocalTireForce.X * 0.01f, FColor::Red, false, -1.f, ECC_WorldStatic, 5.f);
+		DrawDebugLine(GetWorld(), Start, Start + GetRightVector() * LocalTireForce.Y * 0.01f, FColor::Green, false, -1.f, ECC_WorldStatic, 5.f);
 		DrawDebugLine(GetWorld(), Start, Start + GetUpVector() * SpringForce * 0.0001f, FColor::Blue, false, -1.f, ECC_WorldStatic, 5.f);
 	}
 }
@@ -121,6 +117,11 @@ void USuspensionComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 void USuspensionComponent::SetGasInput(float InputValue)
 {
 	GasInput = InputValue;
+}
+
+void USuspensionComponent::SetBrakeInput(float InputValue)
+{
+	BrakeInput = InputValue;
 }
 
 void USuspensionComponent::SetIsDebugging(bool enabled)
@@ -142,14 +143,3 @@ float USuspensionComponent::GetWheelInertia() const
 {
 	return (Radius * 0.01f) * (Radius * 0.01f) * Mass * 0.5f;
 }
-
-void USuspensionComponent::SetWheelTorque(float torque)
-{
-	WheelTorque = torque;
-}
-
-void USuspensionComponent::SetMaxWheelSpeed(float speed)
-{
-	MaxWheelSpeed = speed;
-}
-
